@@ -37,6 +37,8 @@ def create_payment():
 
     db.session.add(payment)
     db.session.commit()
+    logger.info(f"Payment created: {txn_id} for user {data['user_id']} with amount {data['amount']}")
+
 
     return jsonify({
         "message": "Payment created",
