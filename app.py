@@ -3,6 +3,15 @@ from models import db, Payment, PaymentLog
 from config import SQLALCHEMY_DATABASE_URI
 import random
 import uuid
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+logger = logging.getLogger(__name__)
+
 
 app = Flask(__name__)
 
@@ -28,6 +37,8 @@ def create_payment():
 
     db.session.add(payment)
     db.session.commit()
+    logger.info(f"Payment created: {txn_id} for user {data['user_id']} with amount {data['amount']}")
+
 
     return jsonify({
         "message": "Payment created",
@@ -38,6 +49,8 @@ def create_payment():
 @app.route("/process_payment/<int:payment_id>", methods=["POST"])
 def process_payment(payment_id):
     payment = Payment.query.get(payment_id)
+    logger.info(f"Processing payment ID {payment.id} with transaction {payment.transaction_id}")
+
     old_status = payment.status
 
 
@@ -49,15 +62,24 @@ def process_payment(payment_id):
     success = False
 
     while attempt < max_retries and not success:
-        success = random.choice([True, False])
         attempt += 1
+        logger.info(f"Retry attempt {attempt} for payment {payment.id}")
+
+        success = random.choice([True, False])
+
+        if not success:
+            logger.warning(f"Retry attempt {attempt} failed for payment {payment.id}")
+
 
     if success:
         payment.status = "SUCCESS"
         reason = "Processed successfully after retry attempts"
+        logger.info(f"Payment {payment.id} succeeded after retries")
     else:
         payment.status = "FAILED"
         reason = "All retry attempts failed"
+        logger.error(f"Payment {payment.id} failed after all retries")
+
 
     log = PaymentLog(
     payment_id=payment.id,
