@@ -3,6 +3,15 @@ from models import db, Payment, PaymentLog
 from config import SQLALCHEMY_DATABASE_URI
 import random
 import uuid
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+logger = logging.getLogger(__name__)
+
 
 app = Flask(__name__)
 
