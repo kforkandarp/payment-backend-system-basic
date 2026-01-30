@@ -62,8 +62,14 @@ def process_payment(payment_id):
     success = False
 
     while attempt < max_retries and not success:
-        success = random.choice([True, False])
         attempt += 1
+        logger.info(f"Retry attempt {attempt} for payment {payment.id}")
+
+        success = random.choice([True, False])
+
+        if not success:
+            logger.warning(f"Retry attempt {attempt} failed for payment {payment.id}")
+
 
     if success:
         payment.status = "SUCCESS"
