@@ -49,6 +49,8 @@ def create_payment():
 @app.route("/process_payment/<int:payment_id>", methods=["POST"])
 def process_payment(payment_id):
     payment = Payment.query.get(payment_id)
+    logger.info(f"Processing payment ID {payment.id} with transaction {payment.transaction_id}")
+
     old_status = payment.status
 
 
