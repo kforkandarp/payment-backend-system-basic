@@ -74,9 +74,12 @@ def process_payment(payment_id):
     if success:
         payment.status = "SUCCESS"
         reason = "Processed successfully after retry attempts"
+        logger.info(f"Payment {payment.id} succeeded after retries")
     else:
         payment.status = "FAILED"
         reason = "All retry attempts failed"
+        logger.error(f"Payment {payment.id} failed after all retries")
+
 
     log = PaymentLog(
     payment_id=payment.id,
